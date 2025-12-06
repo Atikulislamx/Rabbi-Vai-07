@@ -295,66 +295,30 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function showNotification(message, type) {
-        // Create notification element
+        // Create notification element using DOM methods to avoid XSS
         const notification = document.createElement('div');
-        notification.className = 'notification ' + type;
-        notification.innerHTML = '\
-            <i class="fas ' + (type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle') + '"></i>\
-            <span>' + message + '</span>\
-        ';
+        notification.className = 'notification notification-' + type;
         
-        // Style the notification
-        notification.style.cssText = '\
-            position: fixed;\
-            bottom: 30px;\
-            left: 50%;\
-            transform: translateX(-50%);\
-            padding: 15px 30px;\
-            border-radius: 10px;\
-            display: flex;\
-            align-items: center;\
-            gap: 10px;\
-            font-weight: 500;\
-            z-index: 9999;\
-            animation: slideUp 0.5s ease;\
-            ' + (type === 'success' ? 'background: #10b981; color: #fff;' : 'background: #ef4444; color: #fff;');
+        // Create icon element safely
+        const icon = document.createElement('i');
+        icon.className = 'fas ' + (type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle');
         
+        // Create text span with textContent (safe from XSS)
+        const textSpan = document.createElement('span');
+        textSpan.textContent = message;
+        
+        notification.appendChild(icon);
+        notification.appendChild(textSpan);
         document.body.appendChild(notification);
         
         // Remove after 3 seconds
         setTimeout(function() {
-            notification.style.animation = 'slideDown 0.5s ease forwards';
+            notification.classList.add('notification-hide');
             setTimeout(function() {
                 notification.remove();
             }, 500);
         }, 3000);
     }
-
-    // Add notification animation styles
-    const style = document.createElement('style');
-    style.textContent = '\
-        @keyframes slideUp {\
-            from {\
-                opacity: 0;\
-                transform: translateX(-50%) translateY(20px);\
-            }\
-            to {\
-                opacity: 1;\
-                transform: translateX(-50%) translateY(0);\
-            }\
-        }\
-        @keyframes slideDown {\
-            from {\
-                opacity: 1;\
-                transform: translateX(-50%) translateY(0);\
-            }\
-            to {\
-                opacity: 0;\
-                transform: translateX(-50%) translateY(20px);\
-            }\
-        }\
-    ';
-    document.head.appendChild(style);
 
     // ============================================
     // Intersection Observer for animations
